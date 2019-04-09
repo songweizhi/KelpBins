@@ -2,6 +2,7 @@ import os
 import glob
 from Bio import SeqIO
 
+
 def combine_BM_output(BM_output_file_list_with_path, combined_output):
 
     HGT_identity_dict = {}
@@ -9,15 +10,10 @@ def combine_BM_output(BM_output_file_list_with_path, combined_output):
     HGT_full_length_match_dict = {}
     HGT_occurence_dict = {}
     HGT_concatenated_list = []
-    for pwd_BM_output_file in BM_output_file_list_with_path:
 
+    for pwd_BM_output_file in BM_output_file_list_with_path:
         file_path, file_name = os.path.split(pwd_BM_output_file)
         taxon_rank = file_name.split('_')[-3][0]
-
-        print(file_name)
-
-        print(taxon_rank)
-
         for BM_HGT in open(pwd_BM_output_file):
             if not BM_HGT.startswith('Gene_1'):
                 BM_HGT_split = BM_HGT.strip().split('\t')
@@ -77,11 +73,11 @@ def combine_BM_output(BM_output_file_list_with_path, combined_output):
     combined_output_handle.close()
 
 
-
-
 wd = '/Users/songweizhi/Desktop/555555/TT_90MGs'
 BM_output_folder = 'TT_90MGs_BM'
 combined_output = 'TT_90MGs_BM.txt'
+
+output_prefix = 'GoodBins_0.5_0.05'
 pwd_candidates_seq_file = 'GoodBins_0.5_0.05_all_combined_ffn.fasta'
 
 pwd_candidates_file_ET_validated_fasta_nc = 'GoodBins_0.5_0.05_BM.ffn'

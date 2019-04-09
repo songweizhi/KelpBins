@@ -143,10 +143,13 @@ print()
 
 
 print(df)
-print()
+
+df2 = df.drop(['B', 'C'], axis=1)
+
+print(df2)
 
 
-print(df.loc['20130102'].tolist())
+
 
 
 #print(df.loc[:, df.columns == 'D'].values)

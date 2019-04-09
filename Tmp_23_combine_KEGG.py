@@ -29,7 +29,26 @@ def get_bin_to_ko_percent_dict(pwd_ko_stats, ko_id_all):
     return bin_to_ko_percent
 
 
-KEGG_annot_results_folder = '/Users/songweizhi/Desktop/KelpBins/GoodBins_0.5_0.05_all_KEGG'
+KEGG_annot_results_folder = '/Users/songweizhi/Desktop/KelpBins/GoodBins_0.5_0.05_KEGG_wd'
+KO_description_B = '/Users/songweizhi/KEGG_DB/KO_description_B.txt'
+KO_description_C = '/Users/songweizhi/KEGG_DB/KO_description_C.txt'
+
+columns_to_drop_B = []
+columns_to_drop_C = []
+
+
+KO_description_B_dict = {}
+for each_ko_B in open(KO_description_B):
+    each_ko_B_split = each_ko_B.strip().split('\t')
+    KO_description_B_dict[each_ko_B_split[0]] = each_ko_B_split[1]
+
+
+KO_description_C_dict = {}
+for each_ko_C in open(KO_description_C):
+    each_ko_C_split = each_ko_C.strip().split('\t')
+    KO_description_C_dict[each_ko_C_split[0]] = each_ko_C_split[1]
+
+
 KEGG_wd_folder_list = get_no_hidden_folder_list(KEGG_annot_results_folder)
 
 bin_id_list = []
@@ -42,10 +61,10 @@ for each_folder in KEGG_wd_folder_list:
     bin_id = each_folder.split('_KEGG_wd')[0]
     bin_id_list.append(bin_id)
 
-    pwd_ko_stats_A = '%s/%s/%s_summary_level_A.txt' % (KEGG_annot_results_folder, each_folder, bin_id)
-    pwd_ko_stats_B = '%s/%s/%s_summary_level_B.txt' % (KEGG_annot_results_folder, each_folder, bin_id)
-    pwd_ko_stats_C = '%s/%s/%s_summary_level_C.txt' % (KEGG_annot_results_folder, each_folder, bin_id)
-    pwd_ko_stats_D = '%s/%s/%s_summary_level_D.txt' % (KEGG_annot_results_folder, each_folder, bin_id)
+    pwd_ko_stats_A = '%s/%s/%s_ko_stats_A.txt' % (KEGG_annot_results_folder, each_folder, bin_id)
+    pwd_ko_stats_B = '%s/%s/%s_ko_stats_B.txt' % (KEGG_annot_results_folder, each_folder, bin_id)
+    pwd_ko_stats_C = '%s/%s/%s_ko_stats_C.txt' % (KEGG_annot_results_folder, each_folder, bin_id)
+    pwd_ko_stats_D = '%s/%s/%s_ko_stats_D.txt' % (KEGG_annot_results_folder, each_folder, bin_id)
 
     bin_to_ko_percent_B = get_bin_to_ko_percent_dict(pwd_ko_stats_B, ko_id_B_all)
     bin_to_ko_percent_C = get_bin_to_ko_percent_dict(pwd_ko_stats_C, ko_id_C_all)
@@ -57,6 +76,13 @@ for each_folder in KEGG_wd_folder_list:
 bin_id_list = sorted(bin_id_list)
 ko_id_B_all = sorted(ko_id_B_all)
 ko_id_C_all = sorted(ko_id_C_all)
+
+
+KO_description_B_dict['NA'] = 'NA'
+KO_description_C_dict['NA'] = 'NA'
+
+ko_id_B_all_description = ['B_%s_%s' % (i, KO_description_B_dict[i]) for i in ko_id_B_all]
+ko_id_C_all_description = ['C_%s_%s' % (i, KO_description_C_dict[i]) for i in ko_id_C_all]
 
 
 ko_percent_lol_B = []
@@ -89,12 +115,23 @@ for each_bin in bin_id_list:
     # print(for_out_C)
 
 
-ko_B_percent_df = pd.DataFrame(np.array(ko_percent_lol_B), index=bin_id_list, columns=ko_id_B_all)
-ko_C_percent_df = pd.DataFrame(np.array(ko_percent_lol_C), index=bin_id_list, columns=ko_id_C_all)
+ko_B_percent_df = pd.DataFrame(np.array(ko_percent_lol_B), index=bin_id_list, columns=ko_id_B_all_description)
+#ko_B_percent_df = pd.DataFrame(np.array(ko_percent_lol_B), index=bin_id_list, columns=ko_id_B_all)
+
+ko_C_percent_df = pd.DataFrame(np.array(ko_percent_lol_C), index=bin_id_list, columns=ko_id_C_all_description)
+#ko_C_percent_df = pd.DataFrame(np.array(ko_percent_lol_C), index=bin_id_list, columns=ko_id_C_all)
+#print(ko_B_percent_df.shape)
+#print(ko_C_percent_df.shape)
+
+ko_B_percent_df_no_NA = ko_B_percent_df.loc[:, ko_B_percent_df.columns != 'B_NA_NA']
+ko_C_percent_df_no_NA = ko_C_percent_df.loc[:, ko_C_percent_df.columns != 'C_NA_NA']
 
 
+ko_B_percent_csv_no_NA = '/Users/songweizhi/Desktop/ko_B_percent_df_no_NA.csv'
+ko_C_percent_csv_no_NA = '/Users/songweizhi/Desktop/ko_C_percent_df_no_NA.csv'
 
-print(ko_B_percent_df.shape)
+ko_B_percent_df_no_NA.to_csv(ko_B_percent_csv_no_NA, header=True)
+ko_C_percent_df_no_NA.to_csv(ko_C_percent_csv_no_NA, header=True)
 
 
 # print(ko_B_percent_df.shape)
@@ -110,9 +147,7 @@ print(ko_B_percent_df.shape)
 
 
 
-# ko_B_percent_df_no_NA = ko_B_percent_df.loc[:, ko_B_percent_df.columns != 'NA']
-# ko_C_percent_df_no_NA = ko_C_percent_df.loc[:, ko_C_percent_df.columns != 'NA']
-#
+
 # ko_B_percent_df_NA = ko_B_percent_df.loc[:, ko_B_percent_df.columns == 'NA']
 #
 # print(ko_B_percent_df_NA)
@@ -149,11 +184,11 @@ print(ko_B_percent_df.shape)
 # plt.plot(HGT_value, linewidth=0, marker='o', markersize=7, markeredgewidth=0, color=color_list)
 # plt.plot(HGT_value, 'ro')
 
-
-# #plt.scatter(HGT_value, ko_id_B_all)
+#
+# plt.scatter(HGT_value, ko_id_B_all)
 # plt.xticks(rotation=270)
 # plt.savefig('/Users/songweizhi/Desktop/test_B.png', dpi=300)
-
+#
 
 # #print(len(ko_B_percent_df_NA.values))
 
