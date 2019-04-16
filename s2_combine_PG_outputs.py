@@ -3,6 +3,16 @@ import glob
 from Bio import SeqIO
 
 
+def unique_list_elements(list_input):
+
+    list_output = []
+    for each_element in list_input:
+        if each_element not in list_output:
+            list_output.append(each_element)
+
+    return list_output
+
+
 def combine_PG_output(PG_output_file_list_with_path, output_prefix, detection_ranks, combined_PG_output, combined_PG_output_normal):
 
     HGT_identity_dict = {}
@@ -40,16 +50,19 @@ def combine_PG_output(PG_output_file_list_with_path, output_prefix, detection_ra
                     if concatenated not in HGT_full_length_match_dict:
                         HGT_full_length_match_dict[concatenated] = full_length_match
 
-                    if concatenated not in HGT_direction_dict:
-                        HGT_direction_dict[concatenated] = [direction]
-                    else:
-                        if direction not in HGT_direction_dict[concatenated]:
-                            HGT_direction_dict[concatenated].append(direction)
+                    if direction != 'NA':
+                        if concatenated not in HGT_direction_dict:
+                            HGT_direction_dict[concatenated] = [direction]
+                        else:
+                            if direction not in HGT_direction_dict[concatenated]:
+                                HGT_direction_dict[concatenated].append(direction)
 
-                    if concatenated not in HGT_occurence_dict:
-                        HGT_occurence_dict[concatenated] = [taxon_rank]
-                    else:
-                        HGT_occurence_dict[concatenated].append(taxon_rank)
+                    if direction != 'NA':
+                        if concatenated not in HGT_occurence_dict:
+                            HGT_occurence_dict[concatenated] = [taxon_rank]
+                        else:
+                            HGT_occurence_dict[concatenated].append(taxon_rank)
+
 
     detection_ranks_all = ['d', 'p', 'c', 'o', 'f', 'g', 's']
     detection_ranks_list = []
@@ -58,59 +71,74 @@ def combine_PG_output(PG_output_file_list_with_path, output_prefix, detection_ra
             detection_ranks_list.append(each_rank)
 
 
-    HGT_occurence_dict_formatted = {}
+    HGT_occurence_dict_0_1_format = {}
     for each_HGT in HGT_occurence_dict:
         occurence_str = ''
         for each_level in detection_ranks_list:
+            print(HGT_occurence_dict[each_HGT])
             if each_level in HGT_occurence_dict[each_HGT]:
                 occurence_str += '1'
             else:
                 occurence_str += '0'
-        HGT_occurence_dict_formatted[each_HGT] = occurence_str
+        HGT_occurence_dict_0_1_format[each_HGT] = occurence_str
+
 
     combined_output_handle = open(combined_PG_output, 'w')
     combined_output_handle_normal = open(combined_PG_output_normal, 'w')
 
-    combined_output_handle.write('Gene_1\tGene_2\tIdentity\toccurence(%s)\tend_match\tfull_length_match\n' % detection_ranks)
-    combined_output_handle_normal.write('Gene_1\tGene_2\tIdentity\toccurence(%s)\tend_match\tfull_length_match\n' % detection_ranks)
+    combined_output_handle.write('Gene_1\tGene_2\tIdentity\toccurence(%s)\tend_match\tfull_length_match\tdirection\n' % detection_ranks)
+    combined_output_handle_normal.write('Gene_1\tGene_2\tIdentity\toccurence(%s)\tend_match\tfull_length_match\tdirection\n' % detection_ranks)
 
     for concatenated_HGT in sorted(HGT_concatenated_list):
         concatenated_HGT_split = concatenated_HGT.split('___')
-        concatenated_HGT_direction = HGT_direction_dict[concatenated_HGT]
-        current_direction = 'both'
-        if len(concatenated_HGT_direction) == 1:
-            current_direction = concatenated_HGT_direction[0]
+
+        concatenated_HGT_direction = 'NA'
+        if concatenated_HGT in HGT_direction_dict:
+            concatenated_HGT_direction_list = HGT_direction_dict[concatenated_HGT]
+
+            if len(concatenated_HGT_direction_list) == 1:
+                concatenated_HGT_direction = concatenated_HGT_direction_list[0]
+            else:
+                concatenated_HGT_direction = 'both'
+
+
+        if concatenated_HGT in HGT_occurence_dict_0_1_format:
+            occurence_formatted = HGT_occurence_dict_0_1_format[concatenated_HGT]
+        else:
+            occurence_formatted = '0'*len(detection_ranks_list)
 
         for_out = '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (concatenated_HGT_split[0],
                                                     concatenated_HGT_split[1],
                                                     HGT_identity_dict[concatenated_HGT],
-                                                    HGT_occurence_dict_formatted[concatenated_HGT],
+                                                    occurence_formatted,
                                                     HGT_end_match_dict[concatenated_HGT],
                                                     HGT_full_length_match_dict[concatenated_HGT],
-                                                    current_direction)
+                                                    concatenated_HGT_direction)
 
         combined_output_handle.write(for_out)
 
-        if (HGT_end_match_dict[concatenated_HGT] == 'no') and (HGT_full_length_match_dict[concatenated_HGT] == 'no') and (current_direction != 'NA'):
+        if (HGT_end_match_dict[concatenated_HGT] == 'no') and (HGT_full_length_match_dict[concatenated_HGT] == 'no') and (concatenated_HGT_direction != 'NA'):
             combined_output_handle_normal.write(for_out)
+
 
     combined_output_handle.close()
     combined_output_handle_normal.close()
 
 
-wd = '/Users/songweizhi/Desktop/KelpBins/combined_pcofg'
+wd = '/Users/songweizhi/Desktop/KelpBins/combined_pcofg/PG_pcofg_new_right_algorithm'
 PG_output_folder =          'TT_90MGs_PG'
 pwd_candidates_seq_file =   'GoodBins_0.5_0.05_all_combined_ffn.fasta'
 output_prefix =             'GoodBins_0.5_0.05'
 detection_ranks =           'pcofg'
+
 
 pwd_candidates_file_PG_txt =            '%s_PG_%s.txt'          % (output_prefix, detection_ranks)
 pwd_candidates_file_PG_normal_txt =     '%s_PG_%s_normal.txt'   % (output_prefix, detection_ranks)
 pwd_candidates_file_ET_validated_ffn =  '%s_PG_%s_normal.ffn'   % (output_prefix, detection_ranks)
 pwd_candidates_file_ET_validated_faa =  '%s_PG_%s_normal.faa'   % (output_prefix, detection_ranks)
 
-os.chdir(wd)
 
+os.chdir(wd)
 
 
 PG_output_file_re = '%s/*.txt' % PG_output_folder
@@ -120,7 +148,6 @@ combine_PG_output(PG_output_file_list_with_path, output_prefix, detection_ranks,
 
 
 # export sequence of HGTs as normal
-
 # get sequence id
 validated_candidate_list = set()
 for each in open(pwd_candidates_file_PG_normal_txt):
@@ -144,3 +171,4 @@ for each_candidate in SeqIO.parse(pwd_candidates_seq_file, 'fasta'):
         SeqIO.write(each_candidate_aa, combined_output_validated_fasta_aa_handle, 'fasta')
 combined_output_validated_fasta_nc_handle.close()
 combined_output_validated_fasta_aa_handle.close()
+
