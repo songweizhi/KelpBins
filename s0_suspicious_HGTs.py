@@ -8,3 +8,4 @@ suspicious_HGTs_file_list = [os.path.basename(file_name) for file_name in glob.g
 
 suspicious_HGTs = ['.'.join(i.split('.')[:-1]) for i in suspicious_HGTs_file_list]
 
+#print(suspicious_HGTs)

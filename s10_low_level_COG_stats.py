@@ -9,11 +9,11 @@ def unique_list_elements(list_input):
     return list_output
 
 
-cog_annotation_results_wd = '/Users/songweizhi/Desktop/KelpBins/COG_enrichment_plot_2/GoodBins_0.5_0.05_PG_pcofg_normal_manually_checked_COG_annot'
-pwd_cog_stats_file =        '%s/GoodBins_0.5_0.05_PG_pcofg_normal_manually_checked_cog_stats.txt'      % cog_annotation_results_wd
-pwd_func_stats_file =       '%s/GoodBins_0.5_0.05_PG_pcofg_normal_manually_checked_func_stats.txt'     % cog_annotation_results_wd
-pwd_protein_id_cog_file =   '%s/GoodBins_0.5_0.05_PG_pcofg_normal_manually_checked_protein-id_cog.txt' % cog_annotation_results_wd
-interested_COG_category = 'Q'
+cog_annotation_results_wd = '/Users/songweizhi/Desktop/KelpBins/GoodBins_0.5_0.05_PG_pcofg_recipient_gene_COG_annot'
+pwd_cog_stats_file =        '%s/GoodBins_0.5_0.05_PG_pcofg_recipient_gene_cog_stats.txt'      % cog_annotation_results_wd
+pwd_func_stats_file =       '%s/GoodBins_0.5_0.05_PG_pcofg_recipient_gene_func_stats.txt'     % cog_annotation_results_wd
+pwd_protein_id_cog_file =   '%s/GoodBins_0.5_0.05_PG_pcofg_recipient_gene_protein-id_cog.txt' % cog_annotation_results_wd
+interested_COG_category = 'G'
 
 
 # get COG id to description dict

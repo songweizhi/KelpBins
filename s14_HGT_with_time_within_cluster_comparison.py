@@ -171,24 +171,110 @@ force_create_folder(HGT_with_time_wd)
 # read in cluster info
 cluster_to_genome_member_dict = {}
 genome_to_cluster_dict = {}
-n = 0
-bin_num_list = []
 for bin_cluster in open(cluster_to_genome_member_file):
     bin_cluster_split = bin_cluster.strip().split(':\t')
     cluster_ID = bin_cluster_split[0]
     bin_member = bin_cluster_split[1].split('\t')
 
-    bin_num_list.append(len(bin_member))
+    # get cluster_to_genome_member_dict
+    if len(bin_member) > 1:
+        cluster_to_genome_member_dict[cluster_ID] = bin_member
 
-    if len(bin_member) > 8:
-        print(cluster_ID)
-        print(bin_member)
-        print(len(bin_member))
+    # get genome_to_cluster_dict
+    for each_bin in bin_member:
+        each_bin_no_ext = '.'.join(each_bin.split('.')[:-1])
+        genome_to_cluster_dict[each_bin_no_ext] = cluster_ID
+
+
+# get genome_to_HGT and cluster_to_HGT dict
+recipient_genome_to_HGT_dict = {}
+cluster_to_HGT_dict = {}
+for each_HGT in open(detected_HGTs):
+    if not each_HGT.startswith('Gene_1'):
+        each_HGT_split = each_HGT.strip().split('\t')
+        gene_1 = each_HGT_split[0]
+        gene_2 = each_HGT_split[1]
+        genome_1 = '_'.join(gene_1.split('_')[:-1])
+        genome_2 = '_'.join(gene_2.split('_')[:-1])
+
+        direction = each_HGT_split[5]
+        if multi_level_detection is True:
+            direction = each_HGT_split[6]
+
+        if '%)' in direction:
+            direction = direction.split('(')[0]
+
+        if genome_1 == direction.split('-->')[1]:
+            recipient_genome = genome_1
+            recipient_gene = gene_1
+        else:
+            recipient_gene = gene_2
+            recipient_genome = genome_2
+
+        # get cluster of recipient genome
+        recipient_genome_cluster = genome_to_cluster_dict[recipient_genome]
+
+        # get recipient_genome_to_HGT_dict
+        if recipient_genome not in recipient_genome_to_HGT_dict:
+            recipient_genome_to_HGT_dict[recipient_genome] = [recipient_gene]
+        else:
+            recipient_genome_to_HGT_dict[recipient_genome].append(recipient_gene)
+
+        # get cluster_to_HGT_dict
+        if recipient_genome_cluster not in cluster_to_HGT_dict:
+            cluster_to_HGT_dict[recipient_genome_cluster] = [recipient_gene]
+        else:
+            cluster_to_HGT_dict[recipient_genome_cluster].append(recipient_gene)
+
+
+for each_cluster in cluster_to_genome_member_dict:
+    each_cluster_genome_list = cluster_to_genome_member_dict[each_cluster]
+
+    each_cluster_HGTs_num = 0
+    if each_cluster in cluster_to_HGT_dict:
+        each_cluster_HGTs_num = len(cluster_to_HGT_dict[each_cluster])
+
+    if each_cluster_HGTs_num > 0:
+
+        current_cluster_HGT_time_wd =           '%s/%s'                         % (HGT_with_time_wd, each_cluster)
+        current_clustet_combined_genome =       '%s/%s_combined_genome.fasta'   % (current_cluster_HGT_time_wd, each_cluster)
+        current_cluster_HGT_flk_seqs =          '%s/%s_flk_seqs.fasta'          % (current_cluster_HGT_time_wd, each_cluster)
+        current_cluster_HGT_flk_blast =          '%s/%s_flk_blastn.tab'         % (current_cluster_HGT_time_wd, each_cluster)
+
+        os.mkdir(current_cluster_HGT_time_wd)
+
+        current_clustet_combined_genome_handle = open(current_clustet_combined_genome, 'w')
+        current_cluster_HGT_flk_seqs_handle = open(current_cluster_HGT_flk_seqs, 'w')
+        for each_genome in each_cluster_genome_list:
+            genome_name_no_ext = '.'.join(each_genome.split('.')[:-1])
+
+            # combine current cluster genomes and add genome name to contig ID
+            pwd_genome = '%s/%s' % (bin_folder, each_genome)
+            for contig in SeqIO.parse(pwd_genome, 'fasta'):
+                contig_new = deepcopy(contig)
+                contig_new.id = '%s___%s' % (genome_name_no_ext, str(contig.id))
+                SeqIO.write(contig_new, current_clustet_combined_genome_handle, 'fasta')
+
+            # HGT from current genome
+            current_genome_HGTs = []
+            if genome_name_no_ext in recipient_genome_to_HGT_dict:
+                current_genome_HGTs = recipient_genome_to_HGT_dict[genome_name_no_ext]
+
+            #print('%s\t%s\t%s' % (each_cluster, each_genome, '\t'.join(current_genome_HGTs)))
+
+            if current_genome_HGTs != []:
+                extract_gene_flanking_sequences(prodigal_output_folder, genome_name_no_ext, current_genome_HGTs, flanking_length, min_flanking_length, current_cluster_HGT_flk_seqs_handle)
+
+        current_clustet_combined_genome_handle.close()
+        current_cluster_HGT_flk_seqs_handle.close()
+
+
+        # compare between extracted flanking sequences and genome sequences
+        blastn_cmd = 'blastn -query %s -subject %s -outfmt 6 -out %s' % (current_cluster_HGT_flk_seqs, current_clustet_combined_genome, current_cluster_HGT_flk_blast)
+        os.system(blastn_cmd)
+
+
+        print(each_cluster)
+        get_distance_between_matched_blocks(current_cluster_HGT_flk_blast, distance_cutoff)
         print()
-        n += 1
 
-# print(n)
-#
-# print(bin_num_list)
-# print(sorted(bin_num_list))
-#

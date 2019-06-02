@@ -394,10 +394,4 @@ pwd_HGT_pcofg_faa_manually_checked_file_handle.close()
 # # save plot
 # plt.tight_layout()
 # plt.savefig(pwd_candidates_file_ET_validated_STAT_png, dpi=300)
-#
-#
-#
-#
-#
-#
 

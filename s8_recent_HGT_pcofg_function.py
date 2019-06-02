@@ -18,10 +18,10 @@ def force_create_folder(folder_to_create):
 wd = '/Users/songweizhi/Desktop/KelpBins'
 os.chdir(wd)
 
-HGT_PG_validated_pcofg =          'combined_pcofg/GoodBins_0.5_0.05_PG_pcofg_normal.txt'
-PG_validated_pcofg_gene_id_cog =  'GoodBins_0.5_0.05_pcofg_COG_wd/GoodBins_0.5_0.05_PG_validated_pcofg_COG_results/GoodBins_0.5_0.05_PG_validated_pcofg_protein-id_cog.txt'
-PG_validated_pcofg_cog_stats =    'GoodBins_0.5_0.05_pcofg_COG_wd/GoodBins_0.5_0.05_PG_validated_pcofg_COG_results/GoodBins_0.5_0.05_PG_validated_pcofg_cog_stats.txt'
-PG_validated_pcofg_gene_id_kegg = 'GoodBins_0.5_0.05_pcofg_KEGG_wd/GoodBins_0.5_0.05_PG_validated_pcofg_KO_assignment_DCBA.txt'
+HGT_PG_validated_pcofg =          'combined_pcofg/PG_pcofg_new_right_algorithm/GoodBins_0.5_0.05_PG_pcofg_normal.txt'
+PG_validated_pcofg_gene_id_cog =  '/Users/songweizhi/Desktop/000/GoodBins_0.5_0.05_PG_pcofg_recipient_gene_protein-id_cog.txt'
+PG_validated_pcofg_cog_stats =    '/Users/songweizhi/Desktop/000/GoodBins_0.5_0.05_PG_pcofg_recipient_gene_cog_stats.txt'
+PG_validated_pcofg_gene_id_kegg = '/Users/songweizhi/Desktop/000/GoodBins_0.5_0.05_PG_pcofg_recipient_gene_KO_assignment_DCBA.txt'
 Flanking_region_plots_pcofg =     'combined_pcofg/Flanking_region_plots_pcofg'
 recent_hgt_iden_cutoff = 95
 
