@@ -3,11 +3,11 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-import s0_Kelp_bins_config
-from s0_suspicious_HGTs import suspicious_HGTs
+import Kelp_HGT_config as KelpCfg
 
 
 def plot_list(HGT_per_Mbp_list, HGT_num_per_genome_boxplot):
+
     HGT_per_Mbp_list_with_class = []
     for each in HGT_per_Mbp_list:
         HGT_per_Mbp_list_with_class.append([each, 1])
@@ -23,19 +23,21 @@ def plot_list(HGT_per_Mbp_list, HGT_num_per_genome_boxplot):
     ax = sns.stripplot(x="label", y="num", data=HGT_per_Mbp_list_with_class_df, orient=orient, color='orange', size=3,
                        jitter=0.23)
     ax.set(ylabel='Number of HGT/Mbp sequence', xlabel='Genome')
+
     # plt.show()
     plt.savefig(HGT_num_per_genome_boxplot, dpi=300)
     plt.close()
 
 
-multi_level_detection = True
-HGT_num_per_genome_boxplot = '/Users/songweizhi/Desktop/HGT_num_per_genome_boxplot.png'
-HGT_num_per_genome_boxplot_all = '/Users/songweizhi/Desktop/HGT_num_per_genome_boxplot_all.png'
+# output files
+HGT_num_per_genome_txt =            '%s/HGT_num_per_genome.txt'                 % KelpCfg.KelpBins_wd
+HGT_num_per_genome_boxplot =        '%s/HGT_num_per_genome_boxplot.png'         % KelpCfg.KelpBins_wd
+HGT_num_per_genome_boxplot_all =    '%s/HGT_num_per_genome_boxplot_all.png'     % KelpCfg.KelpBins_wd
 
 
 # store genome size in dict
 genome_size_dict = {}
-for each_size in open(s0_Kelp_bins_config.genome_size_file):
+for each_size in open(KelpCfg.genome_size_file):
     if each_size.strip() != 'Genome\tSize(Mbp)':
         each_size_split = each_size.strip().split('\t')
         genome_file_name = each_size_split[0]
@@ -45,7 +47,7 @@ for each_size in open(s0_Kelp_bins_config.genome_size_file):
 
 # only focus on recipient
 genome_recipient_num_dict = {}
-for each_HGT in open(s0_Kelp_bins_config.HGT_PG_validated_txt_pcofg):
+for each_HGT in open(KelpCfg.Kelp_pcofg_detected_HGTs):
 
     if not each_HGT.startswith('Gene_1'):
         each_HGT_split = each_HGT.strip().split('\t')
@@ -53,41 +55,33 @@ for each_HGT in open(s0_Kelp_bins_config.HGT_PG_validated_txt_pcofg):
         each_HGT_gene_2 = each_HGT_split[1]
         each_HGT_genome_1 = '_'.join(each_HGT_gene_1.split('_')[:-1])
         each_HGT_genome_2 = '_'.join(each_HGT_gene_2.split('_')[:-1])
-        direction = each_HGT_split[5]
         concatenated_genes = '%s___%s' % (each_HGT_gene_1, each_HGT_gene_2)
+        direction = each_HGT_split[6]
 
-        # only plot those with high confidence
-        if concatenated_genes not in suspicious_HGTs:
+        if '%)' in direction:
+            direction = direction.split('(')[0]
 
-            if multi_level_detection is True:
-                direction = each_HGT_split[6]
-
-            if '%)' in direction:
-                direction = direction.split('(')[0]
-
-            if each_HGT_genome_1 == direction.split('-->')[1]:
-                recipient_genome = each_HGT_genome_1
-                recipient_gene = each_HGT_gene_1
-            else:
-                recipient_gene = each_HGT_gene_2
-                recipient_genome = each_HGT_genome_2
+        if each_HGT_genome_1 == direction.split('-->')[1]:
+            recipient_genome = each_HGT_genome_1
+            recipient_gene = each_HGT_gene_1
+        else:
+            recipient_gene = each_HGT_gene_2
+            recipient_genome = each_HGT_genome_2
 
 
-            if recipient_genome not in genome_recipient_num_dict:
-                genome_recipient_num_dict[recipient_genome] = 1
-            else:
-                genome_recipient_num_dict[recipient_genome] += 1
+        if recipient_genome not in genome_recipient_num_dict:
+            genome_recipient_num_dict[recipient_genome] = 1
+        else:
+            genome_recipient_num_dict[recipient_genome] += 1
 
 
-
-
+HGT_num_per_genome_txt_handle = open(HGT_num_per_genome_txt, 'w')
+HGT_num_per_genome_txt_handle.write('Bin\tSize(Mbp)\tHGT_Num\tNum/Mbp\n')
 for genome in genome_recipient_num_dict:
     genome_size = genome_size_dict[genome]
     HGT_num_per_Mbp = float("{0:.2f}".format(genome_recipient_num_dict[genome]/genome_size))
-
-    print('%s\t%s\t%s' % (genome, genome_recipient_num_dict[genome], HGT_num_per_Mbp))
-
-
+    HGT_num_per_genome_txt_handle.write('%s\t%s\t%s\t%s\n' % (genome, genome_size, genome_recipient_num_dict[genome], HGT_num_per_Mbp))
+HGT_num_per_genome_txt_handle.close()
 
 
 HGT_per_Mbp_list = []
@@ -105,12 +99,11 @@ for genome in genome_size_dict:
     HGT_per_Mbp_list_all_genome.append(HGT_num_per_Mbp)
 
 
-print('The number of genomes with identified HGTs: %s' % len(genome_recipient_num_dict))
-
-print(stats.median(HGT_per_Mbp_list))
-
+# get plot
 plot_list(HGT_per_Mbp_list, HGT_num_per_genome_boxplot)
 plot_list(HGT_per_Mbp_list_all_genome, HGT_num_per_genome_boxplot_all)
 
 
+# get stats
+# print(stats.median(HGT_per_Mbp_list))
 

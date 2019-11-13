@@ -29,9 +29,9 @@ def get_bin_to_ko_percent_dict(pwd_ko_stats, ko_id_all):
     return bin_to_ko_percent
 
 
-KEGG_annot_results_folder = '/Users/songweizhi/Desktop/KelpBins/GoodBins_0.5_0.05_KEGG_wd'
-KO_description_B = '/Users/songweizhi/KEGG_DB/KO_description_B.txt'
-KO_description_C = '/Users/songweizhi/KEGG_DB/KO_description_C.txt'
+KEGG_annot_results_folder = '/Users/songweizhi/Desktop/KelpBins/KelpBins_old/GoodBins_0.5_0.05_KEGG_wd'
+KO_description_B = '/Users/songweizhi/DB/KEGG_DB/KO_description_B.txt'
+KO_description_C = '/Users/songweizhi/DB/KEGG_DB/KO_description_C.txt'
 
 columns_to_drop_B = []
 columns_to_drop_C = []
@@ -141,23 +141,17 @@ ko_C_percent_df_no_NA.to_csv(ko_C_percent_csv_no_NA, header=True)
 #
 # for each in ko_B_percent_df.index:
 #     print(each)
-#
 
 #print(ko_B_percent_df)
 
-
-
-
 # ko_B_percent_df_NA = ko_B_percent_df.loc[:, ko_B_percent_df.columns == 'NA']
-#
-# print(ko_B_percent_df_NA)
 
+# print(ko_B_percent_df_NA)
 # print(ko_percent_df.index)
 # print(ko_percent_df.columns)
 # print(ko_percent_df.values)
 # print(ko_C_percent_df.shape)
 # print(ko_C_percent_df)
-
 
 # ko_C_percent_df_no_NA.boxplot(grid=False, figsize=(100, 30))
 # plt.savefig('/Users/songweizhi/Desktop/test_C.png', dpi=300)
