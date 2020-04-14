@@ -1,8 +1,11 @@
 import os
 import glob
 
+# what does this script do:
+# 1. transfer absolute number into percentage
+# 2. prepare table
 
-cog_stats_GeneNumber_folder = '/Users/songweizhi/Desktop/001'
+cog_stats_GeneNumber_folder = '/Users/songweizhi/Desktop/1030_cog_stats_GeneNumber'
 file_out = '/Users/songweizhi/Desktop/COG_enrichment_analysis.csv'
 
 
