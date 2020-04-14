@@ -13,3 +13,8 @@ Rscript ~/PycharmProjects/BioSAK/BioSAK/KEGG_boxplot_last1row.R -i faa_files_Kel
 Rscript ~/PycharmProjects/BioSAK/BioSAK/KEGG_boxplot_last1row.R -i faa_files_Tara_NM_and_HGT_B_GeneNumber_pct.txt -o Tara_and_HGT_KEGG_C_func_pct.png
 
 '''
+
+
+
+
+

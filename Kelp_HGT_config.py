@@ -7,14 +7,14 @@ from Bio import SeqIO
 Kelp_NM_dRep99_wd =                         '/Users/songweizhi/Desktop/Kelp_NM'
 
 # files in
-Kelp_NM_dRep99_pcofg_detected_HGTs =     '%s/file_in/Kelp_NM_dRep99_pcofg_detected_HGTs.txt'                 % Kelp_NM_dRep99_wd
-Kelp_NM_dRep99_pcofg_detected_HGT_seqs = '%s/file_in/Kelp_NM_dRep99_pcofg_detected_HGTs_recipient_genes.faa' % Kelp_NM_dRep99_wd
-Kelp_NM_dRep99_genome_size_file =        '%s/file_in/Kelp_NM_dRep99_all_genome_size.txt'                     % Kelp_NM_dRep99_wd
-MAG_source_file =                        '%s/file_in/MAG_source.txt'                                         % Kelp_NM_dRep99_wd
+Kelp_NM_dRep99_pcofg_detected_HGTs =     '%s/0_file_in/Kelp_NM_dRep99_pcofg_detected_HGTs.txt'                 % Kelp_NM_dRep99_wd
+Kelp_NM_dRep99_pcofg_detected_HGT_seqs = '%s/0_file_in/Kelp_NM_dRep99_pcofg_detected_HGTs_recipient_genes.faa' % Kelp_NM_dRep99_wd
+Kelp_NM_dRep99_genome_size_file =        '%s/0_file_in/Kelp_NM_dRep99_all_genome_size.txt'                     % Kelp_NM_dRep99_wd
+MAG_source_file =                        '%s/0_file_in/MAG_source.txt'                                         % Kelp_NM_dRep99_wd
 
 # files out
-Kelp_recipient_gene_seq_file =           '%s/zKelp_recipient_genes.faa'                                       % Kelp_NM_dRep99_wd
-Tara_NM_recipient_gene_seq_file =        '%s/zTara_NM_recipient_genes.faa'                                    % Kelp_NM_dRep99_wd
+Kelp_recipient_gene_seq_file =           '%s/zKelp_recipient_genes.faa'                                         % Kelp_NM_dRep99_wd
+Tara_NM_recipient_gene_seq_file =        '%s/zTara_NM_recipient_genes.faa'                                      % Kelp_NM_dRep99_wd
 
 
 # script
@@ -24,20 +24,20 @@ Boxplot_last1row = '~/PycharmProjects/MyBioTools/MyBioTools/COG_boxplot_last1row
 ########################################################################################################################
 
 # functional annotation files in
-Kelp_dbCAN_df_txt =     '%s/file_in/faa_files_Kelp_and_HGT_dbCAN_percentage.txt'                % Kelp_NM_dRep99_wd
-Kelp_dbCAN_df_txt_t =   '%s/file_in/faa_files_Kelp_and_HGT_dbCAN_percentage_t.txt'              % Kelp_NM_dRep99_wd
-Tara_dbCAN_df_txt =     '%s/file_in/faa_files_Tara_NM_and_HGT_dbCAN_percentage.txt'             % Kelp_NM_dRep99_wd
-Tara_dbCAN_df_txt_t =   '%s/file_in/faa_files_Tara_NM_and_HGT_dbCAN_percentage_t.txt'           % Kelp_NM_dRep99_wd
+Kelp_dbCAN_df_txt =     '%s/0_file_in/faa_files_Kelp_and_HGT_dbCAN_percentage.txt'                % Kelp_NM_dRep99_wd
+Kelp_dbCAN_df_txt_t =   '%s/0_file_in/faa_files_Kelp_and_HGT_dbCAN_percentage_t.txt'              % Kelp_NM_dRep99_wd
+Tara_dbCAN_df_txt =     '%s/0_file_in/faa_files_Tara_NM_and_HGT_dbCAN_percentage.txt'             % Kelp_NM_dRep99_wd
+Tara_dbCAN_df_txt_t =   '%s/0_file_in/faa_files_Tara_NM_and_HGT_dbCAN_percentage_t.txt'           % Kelp_NM_dRep99_wd
 
-Kelp_COG_df_txt =       '%s/file_in/faa_files_Kelp_and_HGT_cog_cate_percentage.txt'             % Kelp_NM_dRep99_wd
-Kelp_COG_df_txt_t =     '%s/file_in/faa_files_Kelp_and_HGT_cog_cate_percentage_t.txt'           % Kelp_NM_dRep99_wd
-Tara_COG_df_txt =       '%s/file_in/faa_files_Tara_NM_and_HGT_cog_cate_percentage.txt'          % Kelp_NM_dRep99_wd
-Tara_COG_df_txt_t =     '%s/file_in/faa_files_Tara_NM_and_HGT_cog_cate_percentage_t.txt'        % Kelp_NM_dRep99_wd
+Kelp_COG_df_txt =       '%s/0_file_in/faa_files_Kelp_and_HGT_cog_cate_percentage.txt'             % Kelp_NM_dRep99_wd
+Kelp_COG_df_txt_t =     '%s/0_file_in/faa_files_Kelp_and_HGT_cog_cate_percentage_t.txt'           % Kelp_NM_dRep99_wd
+Tara_COG_df_txt =       '%s/0_file_in/faa_files_Tara_NM_and_HGT_cog_cate_percentage.txt'          % Kelp_NM_dRep99_wd
+Tara_COG_df_txt_t =     '%s/0_file_in/faa_files_Tara_NM_and_HGT_cog_cate_percentage_t.txt'        % Kelp_NM_dRep99_wd
 
-Kelp_KEGG_df_txt =      '%s/file_in/faa_files_Kelp_and_HGT_KEGG_C_percentage.txt'               % Kelp_NM_dRep99_wd
-Kelp_KEGG_df_txt_t =    '%s/file_in/faa_files_Kelp_and_HGT_KEGG_C_percentage_t.txt'             % Kelp_NM_dRep99_wd
-Tara_KEGG_df_txt =      '%s/file_in/faa_files_Tara_NM_and_HGT_KEGG_C_percentage.txt'            % Kelp_NM_dRep99_wd
-Tara_KEGG_df_txt_t =    '%s/file_in/faa_files_Tara_NM_and_HGT_KEGG_C_percentage_t.txt'          % Kelp_NM_dRep99_wd
+Kelp_KEGG_df_txt =      '%s/0_file_in/faa_files_Kelp_and_HGT_KEGG_C_percentage.txt'               % Kelp_NM_dRep99_wd
+Kelp_KEGG_df_txt_t =    '%s/0_file_in/faa_files_Kelp_and_HGT_KEGG_C_percentage_t.txt'             % Kelp_NM_dRep99_wd
+Tara_KEGG_df_txt =      '%s/0_file_in/faa_files_Tara_NM_and_HGT_KEGG_C_percentage.txt'            % Kelp_NM_dRep99_wd
+Tara_KEGG_df_txt_t =    '%s/0_file_in/faa_files_Tara_NM_and_HGT_KEGG_C_percentage_t.txt'          % Kelp_NM_dRep99_wd
 
 
 # functional annotation files out
