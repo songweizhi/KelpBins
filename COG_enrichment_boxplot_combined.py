@@ -8,14 +8,19 @@ import seaborn as sns
 
 
 # file in
-COG_func_stats_folder =     '/Users/songweizhi/Desktop/Kelp_NM/COG/COG_func_stats_combined'
-Kelp_HGT_func_stats_file =  '/Users/songweizhi/Desktop/Kelp_NM/COG/zKelp_recipient_genes_func_stats_GeneNumber.txt'
-Tara_HGT_func_stats_file =  '/Users/songweizhi/Desktop/Kelp_NM/COG/zTara_NM_recipient_genes_func_stats_GeneNumber.txt'
+wd = '/Users/songweizhi/Desktop/Kelp_NM/COG'
+wd = '/Users/songweizhi/Desktop/test'
+COG_func_stats_folder =     '%s/COG_func_stats_combined' % wd
+Kelp_HGT_func_stats_file =  '%s/zKelp_recipient_genes_func_stats_GeneNumber.txt' % wd
+Tara_HGT_func_stats_file =  '%s/zTara_NM_recipient_genes_func_stats_GeneNumber.txt' % wd
 column_order = ['J', 'K', 'L', 'V', 'T', 'M', 'U', 'O', 'C', 'G', 'E', 'F', 'H', 'I', 'P', 'Q', 'R', 'S']
 
+
+
 # file out
-df_out = '/Users/songweizhi/Desktop/Kelp_NM/COG/COG_enrichment_boxplot_combined.txt'
-png_out = '/Users/songweizhi/Desktop/Kelp_NM/COG/COG_enrichment_boxplot_combined.png'
+df_out =                    '%s/COG_enrichment_boxplot_combined.txt' % wd
+df_out_with_description =   '%s/COG_enrichment_boxplot_combined_with_description.txt' % wd
+png_out =                   '%s/COG_enrichment_boxplot_combined.svg' % wd
 
 
 COG_func_stats_file_re = '%s/*.txt' % COG_func_stats_folder
@@ -107,13 +112,37 @@ for color in Tara_HGT_cate_pct_color_list:
         Tara_HGT_cate_pct_shape_list.append('s')
 
 
-MAG_df = pd.read_csv(df_out)
+# add description to output file
+cog_fun_file = '/Users/songweizhi/DB/COG2014/fun2003-2014.tab'
+cog_cate_to_fun_dict = {}
+for each_cate in open(cog_fun_file):
+    each_cate_split = each_cate.strip().split('\t')
+    cog_cate_to_fun_dict[each_cate_split[0]] = each_cate_split[1]
+
+df_out_with_description_handle = open(df_out_with_description, 'w')
+for each_mag in open(df_out):
+    if each_mag.startswith('MAG,COG_cate,Percent,Lifestyle'):
+        df_out_with_description_handle.write('MAG\tCOG_cate\tPercent\tLifestyle\n')
+    else:
+        each_mag_split = each_mag.strip().split(',')
+
+        df_out_with_description_handle.write('%s\t%s_%s\t%s\t%s\n' % (each_mag_split[0], each_mag_split[1], cog_cate_to_fun_dict[each_mag_split[1]], each_mag_split[2], each_mag_split[3]))
+
+df_out_with_description_handle.close()
+
+column_order_with_description = ['%s_%s' % (i, cog_cate_to_fun_dict[i]) for i in column_order]
+
+
+#column_order = column_order_with_description
+
+MAG_df = pd.read_csv(df_out_with_description, sep='\t')
 
 box_order =   ['Kelp-associated',   'Planktonic']
 color_order = ['orange',            'lightblue']
 
-sns.boxplot(data=MAG_df, x="COG_cate", y="Percent", order=column_order,
-            hue="Lifestyle", hue_order=box_order, palette=color_order, fliersize=1.2, showfliers=0)
+ax = sns.boxplot(data=MAG_df, x="COG_cate", y="Percent", order=column_order_with_description, linewidth=0.5,
+            hue="Lifestyle", hue_order=box_order, palette=color_order, fliersize=0.3, showfliers=1)
+ax.set_xticklabels(ax.get_xticklabels(), rotation=270, fontsize=4.5)
 
 # add dots for kelp HGTs
 n = 0

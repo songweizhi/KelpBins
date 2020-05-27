@@ -21,7 +21,6 @@ def remove_0_from_Pandas_Series(Pandas_Series):
 csv_file =      '/Users/songweizhi/Desktop/COG_enrichment_analysis/COG_enrichment_analysis.csv'
 output_test =   '/Users/songweizhi/Desktop/COG_enrichment_analysis/COG_enrichment_test_results.tab'
 
-qualified_cog_list = ['COG0171', 'COG0638', 'COG1017', 'COG1316', 'COG1362', 'COG1411', 'COG1594', 'COG1821', 'COG1838', 'COG1907']
 
 # df = pd.read_csv(csv_file, index_col=0)
 df = pd.read_csv(csv_file)
@@ -125,8 +124,12 @@ output_test_handle.close()
 
 
 '''
+overall:
+
+
 normality:
 0
+
 no 0 normality:
 43
 
