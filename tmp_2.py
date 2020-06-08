@@ -78,4 +78,3 @@ print(len(kelp_mag_HGT_num_list))
 print(len(tara_mag_HGT_num_list))
 print(sum(kelp_mag_HGT_num_list)/len(kelp_mag_HGT_num_list))
 print(sum(tara_mag_HGT_num_list)/len(tara_mag_HGT_num_list))
-

@@ -3,6 +3,121 @@ import glob
 from Bio import SeqIO
 
 
+def Get_circlize_plot(multi_level_detection, output_prefix, pwd_candidates_file_PG_normal_txt, genome_to_taxon_dict, circos_HGT_R, pwd_plot_circos, taxon_rank, pwd_MetaCHIP_op_folder):
+
+    pwd_cir_plot_t1 =              '%s/%s_cir_plot_t1.txt'              % (pwd_MetaCHIP_op_folder, output_prefix)
+    pwd_cir_plot_t1_sorted =       '%s/%s_cir_plot_t1_sorted.txt'       % (pwd_MetaCHIP_op_folder, output_prefix)
+    pwd_cir_plot_t1_sorted_count = '%s/%s_cir_plot_t1_sorted_count.txt' % (pwd_MetaCHIP_op_folder, output_prefix)
+    pwd_cir_plot_matrix_filename = '%s/%s_cir_plot_matrix.csv'          % (pwd_MetaCHIP_op_folder, output_prefix)
+
+
+    name2taxon_dict = {}
+    transfers = []
+    for each in open(pwd_candidates_file_PG_normal_txt):
+        if not each.startswith('Gene_1'):
+            each_split = each.strip().split('\t')
+            Gene_1 = each_split[0]
+            Gene_2 = each_split[1]
+            Genome_1 = '_'.join(Gene_1.split('_')[:-1])
+            Genome_2 = '_'.join(Gene_2.split('_')[:-1])
+
+            if Genome_1 in genome_to_taxon_dict:
+                Genome_1_taxon = genome_to_taxon_dict[Genome_1]
+            else:
+                Genome_1_taxon = '%s_' % taxon_rank
+
+
+            if Genome_2 in genome_to_taxon_dict:
+                Genome_2_taxon = genome_to_taxon_dict[Genome_2]
+            else:
+                Genome_2_taxon = '%s_' % taxon_rank
+
+            Direction = each_split[5]
+            if multi_level_detection == True:
+                Direction = each_split[6]
+
+            if '%)' in Direction:
+                Direction = Direction.split('(')[0]
+
+            if Genome_1 not in name2taxon_dict:
+                name2taxon_dict[Genome_1] = Genome_1_taxon
+            if Genome_2 not in name2taxon_dict:
+                name2taxon_dict[Genome_2] = Genome_2_taxon
+            transfers.append(Direction)
+
+
+    tmp1 = open(pwd_cir_plot_t1, 'w')
+    all_group_id = []
+    for each_t in transfers:
+        each_t_split = each_t.split('-->')
+        donor = each_t_split[0]
+        recipient = each_t_split[1]
+        donor_id = name2taxon_dict[donor]
+        recipient_id = name2taxon_dict[recipient]
+        if donor_id not in all_group_id:
+            all_group_id.append(donor_id)
+        if recipient_id not in all_group_id:
+            all_group_id.append(recipient_id)
+        tmp1.write('%s,%s\n' % (donor_id, recipient_id))
+
+    tmp1.close()
+
+    os.system('cat %s | sort > %s' % (pwd_cir_plot_t1, pwd_cir_plot_t1_sorted))
+
+    current_t = ''
+    count = 0
+    tmp2 = open(pwd_cir_plot_t1_sorted_count, 'w')
+    for each_t2 in open(pwd_cir_plot_t1_sorted):
+        each_t2 = each_t2.strip()
+        if current_t == '':
+            current_t = each_t2
+            count += 1
+        elif current_t == each_t2:
+            count += 1
+        elif current_t != each_t2:
+            tmp2.write('%s,%s\n' % (current_t, count))
+            current_t = each_t2
+            count = 1
+    tmp2.write('%s,%s\n' % (current_t, count))
+    tmp2.close()
+
+    # read in count as dict
+    transfer_count = {}
+    for each_3 in open(pwd_cir_plot_t1_sorted_count):
+        each_3_split = each_3.strip().split(',')
+        key = '%s,%s' % (each_3_split[0], each_3_split[1])
+        value = each_3_split[2]
+        transfer_count[key] = value
+
+    all_group_id = sorted(all_group_id)
+
+    matrix_file = open(pwd_cir_plot_matrix_filename, 'w')
+    matrix_file.write('\t' + '\t'.join(all_group_id) + '\n')
+    for each_1 in all_group_id:
+        row = [each_1]
+        for each_2 in all_group_id:
+            current_key = '%s,%s' % (each_2, each_1)
+            if current_key not in transfer_count:
+                row.append('0')
+            else:
+                row.append(transfer_count[current_key])
+        matrix_file.write('\t'.join(row) + '\n')
+    matrix_file.close()
+
+    # get plot with R
+    if len(all_group_id) == 1:
+        print('Too less group (1), plot skipped')
+    elif 1 < len(all_group_id) <= 200:
+        os.system('Rscript %s -m %s -p %s' % (circos_HGT_R, pwd_cir_plot_matrix_filename, pwd_plot_circos))
+    else:
+        print('Too many groups (>200), plot skipped')
+
+    # rm tmp files
+    # os.system('rm %s' % pwd_cir_plot_t1)
+    # os.system('rm %s' % pwd_cir_plot_t1_sorted)
+    # os.system('rm %s' % pwd_cir_plot_t1_sorted_count)
+
+
 # file in
 detected_kelp_HGTs_seq              = '/Users/songweizhi/Desktop/Kelp_NM/0_file_in/Kelp_NM_dRep99_pcofg_detected_HGTs_recipient_genes.faa'
 detected_HGTs                       = '/Users/songweizhi/Desktop/Kelp_NM/0_file_in/Kelp_NM_dRep99_pcofg_detected_HGTs.txt'
@@ -11,13 +126,32 @@ interested_functions                = ['COG1653', 'COG1175', 'K02027', 'COG0601'
 transporters                        = ['COG1653', 'COG1175', 'K02027', 'COG0601', 'K02035', 'COG0410', 'K01996']
 sugar_and_phlorotannins_degradation = ['CE6', 'COG3119', 'COG0346', 'K02610', 'K02611', 'K02613', 'K01912', 'K02618', 'COG4663', 'K03320', 'COG0004']
 ROS_and_stress_response             = ['COG2128', 'COG0376', 'K03782', 'COG2128', 'COG0714']
-potentially_QS                      = ['K01626', 'K01995', 'K02031', 'K02032', 'K02033', 'K01996', 'K01997', 'K01999', 'K02034', 'K03076', 'K02035', 'K01897', 'K10914', 'K01998']
+quorum_sensing                      = ['K01626', 'K01995', 'K02031', 'K02032', 'K02033', 'K01996', 'K01997', 'K01999', 'K02034', 'K03076', 'K02035', 'K01897', 'K10914', 'K01998']
 ribosomal_proteins                  = ['COG0051', 'COG0100', 'COG0048']
 
 interested_functions = interested_functions
+output_prefix = 'combined'
+taxon_rank = 'o'
+
+
+wd =                '/Users/songweizhi/Desktop/ring_chart'
+pwd_grouping_file = '%s/bin_bin_grouping.txt'             % wd
+if taxon_rank ==    'p':
+    taxon_info =    '%s/Kelp_NM_dRep99_p32_grouping.txt'  % wd
+    circos_HGT_R =  '%s/circos_HGT_with_subgroup_p.R'     % wd
+if taxon_rank ==    'c':
+    taxon_info =    '%s/Kelp_NM_dRep99_c50_grouping.txt'  % wd
+    circos_HGT_R =  '%s/circos_HGT_with_subgroup_c.R'     % wd
+if taxon_rank ==    'o':
+    taxon_info =    '%s/Kelp_NM_dRep99_o129_grouping.txt' % wd
+    circos_HGT_R =  '%s/circos_HGT_with_subgroup_o.R'     % wd
+
 
 # file out
-interested_hgts = '/Users/songweizhi/Desktop/ring_chart/interested_hgts.txt'
+interested_hgts =               '%s/interested_hgts.txt'                % wd
+cir_plot_matrix =               '%s/%s_cir_plot_matrix.csv'             % (wd, output_prefix)
+cir_plot_matrix_with_phylum =   '%s/%s_cir_plot_matrix_%s.csv'          % (wd, output_prefix, taxon_rank)
+pwd_plot_circos =               '%s/%s_Grouping_Figure_1.svg'           % (wd, output_prefix)
 
 
 gene_annotation_folder_re = '%s/*.txt' % gene_annotation_folder
@@ -80,103 +214,45 @@ for each in open(detected_HGTs):
                 recipient_and_donor_genes.add(donor_gene)
                 recipient_and_donor_genes.add(recipient_gene)
 
-
 interested_hgts_handle.close()
 
 
+MAG_to_taxon_dict = {}
+for genome in open(taxon_info):
+    MAG_id = genome.strip().split(',')[1]
+    taxon_name = genome.strip().split(',')[2][3:]
+    MAG_to_taxon_dict[MAG_id] = taxon_name
+
+taxon_to_group_id_dict = {}
+for group in open(pwd_grouping_file):
+    group_id = group.strip().split(',')[0]
+    group_taxon = group.strip().split(',')[2]
+    if group_id not in taxon_to_group_id_dict:
+        taxon_to_group_id_dict[group_id] = group_taxon
+
+genome_to_taxon_dict = {}
+for genome in open(pwd_grouping_file):
+    group_id2 = genome.strip().split(',')[0]
+    genome_name = genome.strip().split(',')[1]
+    genome_to_taxon_dict[genome_name] = taxon_to_group_id_dict[group_id2]
 
 
+multi_level_detection = True
+Get_circlize_plot(multi_level_detection, output_prefix, interested_hgts, genome_to_taxon_dict, circos_HGT_R, pwd_plot_circos, taxon_rank, wd)
 
 
-
-
-
-
-
-id_to_fun_dict = {}
-
-for fun_1 in transporters:
-    id_to_fun_dict[fun_1] = ['transporters']
-
-for fun_2 in sugar_and_phlorotannins_degradation:
-    if fun_2 not in id_to_fun_dict:
-        id_to_fun_dict[fun_2] = ['sugar_and_phlorotannins_degradation']
+cir_plot_matrix_with_phylum_handle = open(cir_plot_matrix_with_phylum, 'w')
+n = 0
+for line in open(cir_plot_matrix):
+    line_split = line.strip().split('\t')
+    if n == 0:
+        header_list = ['%s__%s' % (MAG_to_taxon_dict[i], i) for i in line_split]
+        cir_plot_matrix_with_phylum_handle.write('\t%s\n' % '\t'.join(header_list))
     else:
-        id_to_fun_dict[fun_2].append('sugar_and_phlorotannins_degradation')
-
-for fun_3 in ROS_and_stress_response:
-    if fun_3 not in id_to_fun_dict:
-        id_to_fun_dict[fun_3] = ['ROS_and_stress_response']
-    else:
-        id_to_fun_dict[fun_3].append('ROS_and_stress_response')
-
-for fun_4 in potentially_QS:
-    if fun_4 not in id_to_fun_dict:
-        id_to_fun_dict[fun_4] = ['potentially_QS']
-    else:
-        id_to_fun_dict[fun_4].append('potentially_QS')
-
-for fun_5 in ribosomal_proteins:
-    if fun_5 not in id_to_fun_dict:
-        id_to_fun_dict[fun_5] = ['ribosomal_proteins']
-    else:
-        id_to_fun_dict[fun_5].append('ribosomal_proteins')
-
-print(recipient_and_donor_genes)
-genome_to_function_dict= {}
-for each_gene in recipient_and_donor_genes:
-
-    each_gene_genome = '_'.join(each_gene.split('_')[:-1])
-    each_gene_function = gene_to_function_dict[each_gene]
-
-    each_gene_function_cate = set()
-
-    for function in each_gene_function:
-        if function in id_to_fun_dict:
-
-            for i in id_to_fun_dict[function]:
-                each_gene_function_cate.add(i)
+        cir_plot_matrix_with_phylum_handle.write('%s__%s' % (MAG_to_taxon_dict[line_split[0]], line))
+    n += 1
+cir_plot_matrix_with_phylum_handle.close()
 
 
-    print(each_gene)
-    print(each_gene_function)
-    print(each_gene_function_cate)
+os.system('Rscript %s -m %s/%s_cir_plot_matrix_%s.csv -p %s/%s_cir_plot_matrix_%s.pdf -s __' % (circos_HGT_R, wd, output_prefix, taxon_rank, wd, output_prefix, taxon_rank))
 
-    if each_gene_genome not in genome_to_function_dict:
-        genome_to_function_dict[each_gene_genome] = each_gene_function_cate
-    else:
-        for i in each_gene_function_cate:
-            genome_to_function_dict[each_gene_genome].add(i)
-
-print(genome_to_function_dict)
-
-
-
-for each in genome_to_function_dict:
-
-    print(len(genome_to_function_dict[each]))
-
-
-
-
-
-
-
-traits_to_plot = '''
-
-1) transport
-'COG1653', 'COG1175', 'K02027', 'COG0601', 'K02035', 'COG0410', 'K01996'
-
-2) sugar and phlorotannins degradation
-'CE6', 'COG3119', 'COG0346', 'K02610', 'K02611', 'K02613', 'K01912', 'K02618', 'COG4663', 'K03320', 'COG0004'
-
-3) ROS and stress response
-'COG2128', 'COG0376', 'K03782', 'COG2128', 'COG0714' 
-
-4) potentially QS
-'K01626', 'K01995', 'K02031', 'K02032', 'K02033', 'K01996', 'K01997', 'K01999', 'K02034', 'K03076', 'K02035', 'K01897', 'K10914', 'K01998'
-
-5) ribosomal proteins
-'COG0051', 'COG0100', 'COG0048'
-
-'''
